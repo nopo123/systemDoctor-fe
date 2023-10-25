@@ -11,6 +11,8 @@ const Loadable = (Component) => (props) =>
 const Register = Loadable(lazy(() => import('./pages/Register')));
 const Login = Loadable(lazy(() => import('./pages/Login')));
 const GuestGuard = Loadable(lazy(() => import('./components/GuestGuard')));
+const AuthGuard = Loadable(lazy(() => import('./components/AuthGuard')));
+const Dashboard = Loadable(lazy(() => import('./pages/Dashboard')));
 
 const routes = [
   {
@@ -31,6 +33,14 @@ const routes = [
       <GuestGuard>
         <Login />
       </GuestGuard>
+    )
+  },
+  {
+    path: '/dashboard',
+    element: (
+      <AuthGuard>
+        <Dashboard />
+      </AuthGuard>
     )
   }
 ]

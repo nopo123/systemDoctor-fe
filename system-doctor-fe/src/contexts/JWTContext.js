@@ -52,9 +52,10 @@ export const AuthProvider = (props) => {
   useEffect(() => {
     const initialize = async () => {
       const accessToken = AppService.getToken();
+      console.log(accessToken);
 
       if (accessToken) {
-        const user = null;
+        const user = await UserService.me();
 
         dispatch({
           type: 'INITIALIZE',
@@ -77,21 +78,26 @@ export const AuthProvider = (props) => {
     initialize();
   }, []);
 
-  const login = async (email, password) => {
-    const res = await UserService.login({
-      email,
-      password,
-    });
-
-    const { user, access_token: accessToken } = res;
-    AppService.setToken(accessToken);
-
-    dispatch({
-      type: 'LOGIN',
-      payload: {
-        user,
-      },
-    });
+  const login = async (values) => {
+    try {
+      const res = await UserService.login(values);
+  
+      if (res.access_token) {
+        AppService.setToken(res.access_token);
+  
+        dispatch({
+          type: 'LOGIN',
+          payload: {
+            user: res.user,
+          },
+        });
+      } else {
+        console.log("Response is missing accessToken:", res);
+      }
+    } catch (e) {
+      console.error("Error in login function:", e);
+      throw e; // Rethrow the error for further handling
+    }
   };
 
   const logout = async () => {
