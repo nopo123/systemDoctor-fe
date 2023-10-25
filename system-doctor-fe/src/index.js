@@ -3,11 +3,20 @@ import ReactDOM from 'react-dom/client';
 import './index.css';
 import App from './App';
 import reportWebVitals from './reportWebVitals';
+import { BrowserRouter } from 'react-router-dom';
+import { AuthProvider } from './contexts/JWTContext';
+import { SnackbarProvider } from 'notistack';
 
 const root = ReactDOM.createRoot(document.getElementById('root'));
 root.render(
   <React.StrictMode>
-    <App />
+    <BrowserRouter>
+      <AuthProvider>
+        <SnackbarProvider maxSnack={2} autoHideDuration={1700}>
+          <App />
+        </SnackbarProvider>
+      </AuthProvider>
+    </BrowserRouter>
   </React.StrictMode>
 );
 
