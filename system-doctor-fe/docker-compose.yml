@@ -1,7 +1,13 @@
-version: '3.8'
-
+version: '3'
 services:
-  web:
-    build: .
+  react-app:
+    build:
+      context: .
+      dockerfile: Dockerfile
     ports:
-      - "5000:5000"
+      - "3001:80"
+    networks:
+      - my-network
+networks:
+  my-network:
+    external: true
