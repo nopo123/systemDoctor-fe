@@ -7,9 +7,11 @@ import Button from '@mui/material/Button';
 import UserService from '../services/UserService';
 import { useSnackbar } from 'notistack';
 import { parseErrorMessage } from '../utils/errorMessage';
+import { useNavigate } from 'react-router-dom';
 
 const Register = () => {
   const { enqueueSnackbar } = useSnackbar();
+  const navigate = useNavigate();
   const passwordRegex =
   /^(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{6,}$/;
 
@@ -36,7 +38,6 @@ const Register = () => {
 
   const onSubmit = async (values, { setSubmitting, resetForm }) => {
     try {
-      console.log(values);
       await UserService.register(values)
       resetForm();
       enqueueSnackbar('success', { variant: 'success' });
@@ -48,7 +49,8 @@ const Register = () => {
 
   return (
     <div className={styles.registerWrapper}>
-      <h1>Register</h1>
+      <h1 className={styles.nonActive} onClick={() => navigate('/login')}>Login</h1>
+      <h1 className={styles.active}>Register</h1>
       <Formik initialValues={initialValues} validationSchema={validationSchema} onSubmit={onSubmit}>
       {({ errors, touched, values, handleChange, handleBlur, isSubmitting }) => (
         <Form>
