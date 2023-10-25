@@ -1,12 +1,11 @@
-import { useNavigate } from 'react-router-dom';
 import useAuth from '../hooks/useAuth';
+import Login from '../pages/Login';
 
 const AuthGuard = props => {
 	const auth = useAuth();
-  const navigate = useNavigate();
 
 	if (!auth.isAuthenticated) {
-		return navigate('/login');
+		return <Login />
 	}
 
   return props.children;
