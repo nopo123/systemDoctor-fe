@@ -8,20 +8,10 @@ const initialState = {
 const slice = createSlice({
   name: 'settings',
   initialState,
-  reducers: {
-    setAtempt: (state) => {
-      state.atempt += 1;
-    },
-    setOut: (state, action) => {
-      state.timeout = action.payload;
-    },
-    clearOut: (state) => {
-      state.atempt = 0;
-    },
-  }
+  reducers: {}
 });
 
-export const { setAtempt, setOut, clearOut } = slice.actions;
+export const { } = slice.actions;
 export default slice.reducer;
 
 
