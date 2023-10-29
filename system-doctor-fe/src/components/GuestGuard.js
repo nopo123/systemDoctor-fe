@@ -7,7 +7,6 @@ const GuestGuard = ({ children }) => {
   const { isAuthenticated } = useAuth();
   const navigate = useNavigate();
   const location = window.location.pathname;
-  console.log(location);
 
   if (!isAuthenticated) {
     if (location.includes('/login')) {
