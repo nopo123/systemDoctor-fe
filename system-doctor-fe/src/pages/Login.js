@@ -1,4 +1,4 @@
-import React from 'react'
+import React, { useEffect } from 'react'
 import useAuth from '../hooks/useAuth'
 import { Form, Formik } from 'formik'
 import * as Yup from 'yup'
@@ -7,11 +7,16 @@ import { useSnackbar } from 'notistack'
 import { useNavigate } from 'react-router-dom'
 import styles from '../styles/Register.module.css'
 import Button from '@mui/material/Button'
+import { useDispatch, useSelector } from 'react-redux'
+import { setAtempt, clearOut, setOut } from '../redux/slices/settings'
+import AppService from '../services/AppService'
 
 const Login = () => {
   const { login } = useAuth()
   const { enqueueSnackbar } = useSnackbar()
   const navigate = useNavigate()
+  const dispatch = useDispatch()
+  const { atempt, timeout } = useSelector(state => state.setting)
 
   const validationSchema = Yup.object({
     email: Yup.string().email('Invalid email address').required('Required'),
@@ -23,17 +28,46 @@ const Login = () => {
     password: ''
   }
 
+  const timeoutHandler = () => {
+    setTimeout(() => {
+      dispatch(clearOut())
+      dispatch(setOut(false))
+      AppService.setTimeoutUser(false)
+    }, 60000)
+  }
+
   const onSubmit = async (values, { setSubmitting, resetForm }) => {
+    if (timeout) {
+      enqueueSnackbar('Too many login attempts. Please try again later.', {
+        variant: 'error'
+      })
+      return
+    }
     try {
       await login(values)
       resetForm()
       enqueueSnackbar('success', { variant: 'success' })
       navigate('/dashboard')
     } catch (e) {
-      enqueueSnackbar('Unauthorized', { variant: 'error' })
+      if (atempt === 2) {
+        enqueueSnackbar('Too many login attempts. Please try again later.', {
+          variant: 'error'
+        })
+        dispatch(setOut(true))
+        AppService.setTimeoutUser(true)
+      } else {
+        dispatch(setAtempt())
+        enqueueSnackbar('Unauthorized', { variant: 'error' })
+      }
     }
     setSubmitting(false)
   }
+
+  useEffect(() => {
+    const _timeout = AppService.getTimeoutUser()
+    dispatch(setOut(_timeout === 'true' ? true : false))
+    if(timeout) timeoutHandler()
+  }, [setTimeout, timeout]);
 
   return (
     <div className={styles.registerWrapper}>

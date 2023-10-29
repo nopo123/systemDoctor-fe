@@ -52,18 +52,21 @@ export const AuthProvider = (props) => {
   useEffect(() => {
     const initialize = async () => {
       const accessToken = AppService.getToken();
-      console.log(accessToken);
 
       if (accessToken) {
+        try {
+          const user = await UserService.me();
+          dispatch({
+            type: 'INITIALIZE',
+            payload: {
+              isAuthenticated: true,
+              user,
+            },
+          });
+        } catch (e) {
+          console.error("Error authentication:");
+        }
         const user = await UserService.me();
-
-        dispatch({
-          type: 'INITIALIZE',
-          payload: {
-            isAuthenticated: true,
-            user,
-          },
-        });
       } else {
         dispatch({
           type: 'INITIALIZE',
