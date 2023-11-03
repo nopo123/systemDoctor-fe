@@ -1,10 +1,11 @@
-import React from 'react'
+import React, { useState } from 'react';
 import useAuth from '../hooks/useAuth'
 import Button from '@mui/material/Button'
 import { useSnackbar } from 'notistack'
 import { useNavigate } from 'react-router-dom'
 import styles from '../styles/Register.module.css'
 import UserService from '../services/UserService'
+import CypherService from '../services/CypherService'
 
 import { Formik, Form, Field } from 'formik';
 import * as Yup from 'yup';
@@ -25,20 +26,13 @@ const Dashboard = () => {
   const publicKeyValidationSchema = Yup.object({
     publicKey: Yup.string()
       .required('Public Key is required')
-      // Add any specific validation rules for your public key format here
-  });
-
-  const privateKeyValidationSchema = Yup.object({
-    privateKey: Yup.string()
-      .required('Private Key is required')
-      // Add any specific validation rules for your private key format here
   });
 
   const onSubmitPublic = async (values, { setSubmitting, resetForm }) => {
     try {
-      await UserService.updatePublic({ publicKey: values.publicKey });
-      const user = await UserService.me()
-      console.log(user)
+      await UserService.updatePublic({ publicKey: values.publicKey })
+      const publicK = await UserService.me();
+      console.log(publicK.publicKey)
       resetForm()
       enqueueSnackbar('Public key submitted', { variant: 'success' })
     } catch (e) {
@@ -47,16 +41,28 @@ const Dashboard = () => {
     setSubmitting(false)
   }
 
-  const onSubmitPrivate = async (values, { setSubmitting, resetForm }) => {
+  const [privateKey, setPrivateKey] = useState('');
+
+  const onClickGeneratePair = async () => {
     try {
-      //wait login(values)
-      resetForm()
-      enqueueSnackbar('Private key submitted', { variant: 'success' })
+      const privateKey = await CypherService.generateKeyPair();
+      setPrivateKey(privateKey);
+      const publicK = await UserService.me();
+      console.log(publicK.publicKey)
+
+      enqueueSnackbar('Key pair generated', { variant: 'success' });
     } catch (e) {
-      enqueueSnackbar(parseErrorMessage(e), { variant: 'error' })
+      enqueueSnackbar(parseErrorMessage(e), { variant: 'error' });
     }
-    setSubmitting(false)
-  }
+  };
+
+  const copyToClipboard = () => {
+    navigator.clipboard.writeText(privateKey).then(() => {
+      enqueueSnackbar('Private key copied to clipboard', { variant: 'success' });
+      setPrivateKey(''); 
+      enqueueSnackbar('Failed to copy private key', { variant: 'error' });
+    });
+  };
 
   return (
     <div>
@@ -88,30 +94,25 @@ const Dashboard = () => {
         </Formik>
       </div>
 
-      <div className={styles.formWrapper}>
-        <h2>Private Key Form</h2>
-        <Formik
-          initialValues={{ privateKey: '' }}
-          validationSchema={privateKeyValidationSchema}
-          onSubmit={onSubmitPrivate}
-        >
-          {({ errors, touched }) => (
-            <Form>
-              <Field name="privateKey" as={TextField}
-                fullWidth
-                error={Boolean(touched.privateKey && errors.privateKey)}
-                helperText={touched.privateKey && errors.privateKey}
-                label="Private Key"
-                margin="normal"
-                variant="standard"
-                required
-              />
-              <Button type="submit" variant="contained" color="secondary">Submit Private Key</Button>
-            </Form>
-          )}
-        </Formik>
-      </div>
-      <Button onClick={Logout} variant="contained" color="info" style={{ marginTop: '60px' }}>Generate key pair</Button>
+      <Button onClick={onClickGeneratePair} variant="contained" color="secondary" style={{ margin: '60px 0' }}>Generate key pair</Button>
+      <TextField
+        label="Your Private Key"
+        margin="normal"
+        variant="outlined"
+        value={privateKey}
+        multiline 
+        rows={5} 
+        style={{
+          width: '50%', 
+          margin: 'auto' 
+        }}
+        InputProps={{
+          readOnly: true,
+          endAdornment: (
+            <Button onClick={copyToClipboard}>Copy</Button>
+          ),
+        }}
+      />
       </div>
 
     </div>
