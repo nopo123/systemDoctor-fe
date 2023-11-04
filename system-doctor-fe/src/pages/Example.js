@@ -4,7 +4,13 @@ import { useSnackbar } from 'notistack'
 import { useNavigate } from 'react-router-dom'
 import Button from '@mui/material/Button'
 import CypherService from '../services/CypherService'
-import { Dialog, DialogActions, DialogContent, DialogTitle, TextField } from '@mui/material'
+import {
+  Dialog,
+  DialogActions,
+  DialogContent,
+  DialogTitle,
+  TextField
+} from '@mui/material'
 import { fetchData } from '../utils/decrypt'
 import { parseErrorMessage } from '../utils/errorMessage'
 
@@ -24,32 +30,38 @@ const Example = () => {
 
   const privateKeyHandler = () => {
     if (!privateKey) {
-      enqueueSnackbar('Could not decrypt data, missing private key', { variant: 'error' })
-      return false;
+      enqueueSnackbar('Could not decrypt data, missing private key', {
+        variant: 'error'
+      })
+      return false
     }
-    return true;
+    return true
   }
 
   const handleClose = () => {
-    privateKeyHandler();
-    setOpen(false);
+    privateKeyHandler()
+    setOpen(false)
   }
 
   const handleSave = async () => {
     if (!privateKeyHandler()) {
-      return;
+      return
     }
     try {
-      const _data = await CypherService.getEncryptedData();
-      const parsedData = fetchData(privateKey, _data);
-      if (!parsedData) {
-        enqueueSnackbar("Missing part in private BEGIN PRIVATE or END PRIVATE", { variant: 'error' })
-        return;
+      const _data = await CypherService.getEncryptedData()
+      const parsedData = fetchData(privateKey, _data)
+      if (!parsedData.message) {
+        enqueueSnackbar(parsedData.error, { variant: 'error' })
+        return
       }
-      setData(parsedData);
-      setOpen(false);
+      setData(parsedData.message)
+      setOpen(false)
     } catch (e) {
-      enqueueSnackbar(parseErrorMessage(e), { variant: 'error' })
+      const error =
+        parseErrorMessage(e) === 'Internal server error'
+          ? 'Could not decrypt data, wrong public key or private key'
+          : parseErrorMessage(e)
+      enqueueSnackbar(error, { variant: 'error' })
     }
   }
 
@@ -60,10 +72,10 @@ const Example = () => {
   useEffect(() => {
     const fetchEncryptedData = async () => {
       if (!privateKey) {
-        setOpen(true);
+        setOpen(true)
       }
     }
-    fetchEncryptedData();
+    fetchEncryptedData()
   }, [])
 
   return (
@@ -89,28 +101,31 @@ const Example = () => {
         </Button>
       </div>
       <div>
-        {data.length > 0 && data.map((item, index) => (
-          <div key={index} style={{ margin: 5 }}>
-            <h3>Krstné meno: {item.firstName}</h3>
-            <p>Priezvisko: {item.lastName}</p>
-            <p>Text: {item.text ? item.text : 'Ziadny text'}</p>
-          </div>
-        ))}
+        {data.length > 0 &&
+          data.map((item, index) => (
+            <div key={index} style={{ margin: 5 }}>
+              <h3>Krstné meno: {item.firstName}</h3>
+              <p>Priezvisko: {item.lastName}</p>
+              <p>Text: {item.text ? item.text : 'Ziadny text'}</p>
+            </div>
+          ))}
       </div>
 
       <Dialog onClose={handleClose} open={open}>
-        <DialogTitle>Please, enter your private key to decrypt data</DialogTitle>
+        <DialogTitle>
+          Please, enter your private key to decrypt data
+        </DialogTitle>
         <DialogContent>
-            <TextField
-              autoFocus
-              margin='dense'
-              id='privateKey'
-              label='private key'
-              type='text'
-              fullWidth
-              value={privateKey || ''}
-              onChange={(e) => setPrivateKey(e.target.value)}
-            />
+          <TextField
+            autoFocus
+            margin='dense'
+            id='privateKey'
+            label='private key'
+            type='text'
+            fullWidth
+            value={privateKey || ''}
+            onChange={e => setPrivateKey(e.target.value)}
+          />
         </DialogContent>
         <DialogActions>
           <Button onClick={handleClose} color='error'>

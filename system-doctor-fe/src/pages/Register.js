@@ -23,7 +23,7 @@ const Register = () => {
       .required('Required')
       .matches(
         passwordRegex,
-        'Password must contain at least one uppercase letter, /n' +
+        'Password must contain at least one uppercase letter, ' +
           'one digit, one special character, and be at least 6 characters long.'
       ),
     confirmationPassword: Yup.string()

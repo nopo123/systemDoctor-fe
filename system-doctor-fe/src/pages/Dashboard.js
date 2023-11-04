@@ -35,7 +35,7 @@ const Dashboard = () => {
   }
 
   const publicKeyValidationSchema = Yup.object({
-    publicKey: Yup.string().required('Public Key is required')
+    publicKey: Yup.string().required('Public key is required')
   })
 
   const onSubmitPublic = async (values, { setSubmitting, resetForm }) => {
@@ -55,7 +55,9 @@ const Dashboard = () => {
       setPrivateKey(keys.privateKey)
       setPublicKey(keys.publicKey)
       enqueueSnackbar('Key pair generated', { variant: 'success' })
-      enqueueSnackbar('Your old public key was rewrited', { variant: 'success' })
+      enqueueSnackbar('Your old public key was rewrited', {
+        variant: 'success'
+      })
     } catch (e) {
       enqueueSnackbar(parseErrorMessage(e), { variant: 'error' })
     }
@@ -122,94 +124,111 @@ const Dashboard = () => {
             onChange={() => setCheckedPair(!checkedPair)}
           />
         </div>
-        {checkedPublic && <div>
-          <h2>Public Key Form</h2>
-          <Formik
-            initialValues={{ publicKey: '' }}
-            validationSchema={publicKeyValidationSchema}
-            onSubmit={onSubmitPublic}
-          >
-            {({ errors, touched }) => (
-              <Form>
-                <Field
-                  name='publicKey'
-                  as={TextField}
-                  fullWidth
-                  error={Boolean(touched.publicKey && errors.publicKey)}
-                  helperText={touched.publicKey && errors.publicKey}
-                  label='Public Key'
-                  margin='normal'
-                  variant='standard'
-                  required
-                />
-                <Button type='submit' variant='contained' color='primary'>
-                  Submit Public Key
-                </Button>
-              </Form>
-            )}
-          </Formik>
-        </div>}
-
-        {checkedPair && <div className={keyStyles.optionalKey}>
-          <div className={keyStyles.stackedDiv}>
-            <Button
-              onClick={onClickGeneratePair}
-              variant='contained'
-              color='secondary'
-              style={{ margin: '60px 0' }}
+        {checkedPublic && (
+          <div>
+            <h2>Public Key Form</h2>
+            <Formik
+              initialValues={{ publicKey: '' }}
+              validationSchema={publicKeyValidationSchema}
+              onSubmit={onSubmitPublic}
             >
-              Generate key pair
-            </Button>
+              {({ errors, touched, handleChange }) => (
+                <Form>
+                  <div>
+                    <FormGroup>
+                      <Field
+                        name='publicKey'
+                        as={TextField}
+                        label='Public Key'
+                        margin='normal'
+                        variant='outlined'
+                        error={Boolean(touched.publicKey && errors.publicKey)}
+                        helperText={touched.publicKey && errors.publicKey}
+                        onChange={handleChange}
+                        multiline
+                        rows={5}
+                        style={{
+                          maxWidth: '400px',
+                          width: '300px',
+                        }}
+                      />
+                    </FormGroup>
+                  </div>
+                  <div style={{ marginTop: 5 }}>
+                    <Button type='submit' variant='contained' color='primary'>
+                      Submit Public Key
+                    </Button>
+                  </div>
+                </Form>
+              )}
+            </Formik>
           </div>
-          <div className={keyStyles.stackedDiv}>
-            <TextField
-              label='Your Private Key'
-              margin='normal'
-              variant='outlined'
-              value={privateKey}
-              multiline
-              rows={5}
-              style={{
-                maxWidth: '90%',
-                margin: 'auto',
-                width: '100%'
-              }}
-              InputProps={{
-                readOnly: true,
-                endAdornment: (
-                  <Button
-                    onClick={() => copyToClipboard(privateKey, 'private')}
-                  >
-                    Copy
-                  </Button>
-                )
-              }}
-            />
+        )}
+
+        {checkedPair && (
+          <div className={keyStyles.optionalKey}>
+            <div className={keyStyles.stackedDiv}>
+              <Button
+                onClick={onClickGeneratePair}
+                variant='contained'
+                color='secondary'
+                style={{ margin: '60px 0' }}
+              >
+                Generate key pair
+              </Button>
+            </div>
+            <div className={keyStyles.stackedDiv}>
+              <TextField
+                label='Your Private Key'
+                margin='normal'
+                variant='outlined'
+                value={privateKey}
+                multiline
+                rows={5}
+                style={{
+                  maxWidth: '90%',
+                  margin: 'auto',
+                  width: '100%'
+                }}
+                InputProps={{
+                  readOnly: true,
+                  endAdornment: (
+                    <Button
+                      onClick={() => copyToClipboard(privateKey, 'private')}
+                    >
+                      Copy
+                    </Button>
+                  )
+                }}
+              />
+            </div>
+            <div className={keyStyles.stackedDiv}>
+              <TextField
+                label='Your Public Key'
+                margin='normal'
+                variant='outlined'
+                value={publicKey}
+                multiline
+                rows={5}
+                style={{
+                  maxWidth: '90%',
+                  margin: 'auto',
+                  width: '100%'
+                }}
+                InputProps={{
+                  readOnly: true,
+                  endAdornment: (
+                    <Button
+                      onClick={() => copyToClipboard(publicKey, 'public')}
+                    >
+                      Copy
+                    </Button>
+                  )
+                }}
+              />
+            </div>
           </div>
-          <div className={keyStyles.stackedDiv}>
-            <TextField
-              label='Your Public Key'
-              margin='normal'
-              variant='outlined'
-              value={publicKey}
-              multiline
-              rows={5}
-              style={{
-                maxWidth: '90%',
-                margin: 'auto',
-                width: '100%'
-              }}
-              InputProps={{
-                readOnly: true,
-                endAdornment: (
-                  <Button onClick={() => copyToClipboard(publicKey, 'public')}>
-                    Copy
-                  </Button>
-                )
-              }}
-            />
-          </div>
-        </div>}
+        )}
       </div>
     </div>
   )

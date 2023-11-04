@@ -31,7 +31,7 @@ const Login = () => {
     try {
       await login(values)
       resetForm()
-      enqueueSnackbar('success', { variant: 'success' })
+      enqueueSnackbar('Success', { variant: 'success' })
       navigate('/dashboard')
     } catch (e) {
       enqueueSnackbar(parseErrorMessage(e), { variant: 'error' })
