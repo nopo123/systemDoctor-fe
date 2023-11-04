@@ -1,0 +1,11 @@
+.optionalKey {
+  max-width: 600px;
+  width: 100%;
+  text-align: center;
+}
+
+.stackedDiv {
+  margin: 20px; /* To create space between stacked divs */
+  width: 100%;
+  max-height: 500px;
+}
