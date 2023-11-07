@@ -14,6 +14,7 @@ const GuestGuard = Loadable(lazy(() => import('./components/GuestGuard')));
 const AuthGuard = Loadable(lazy(() => import('./components/AuthGuard')));
 const Dashboard = Loadable(lazy(() => import('./pages/Dashboard')));
 const Example = Loadable(lazy(() => import('./pages/Example')));
+const CreatePatient = Loadable(lazy(() => import('./pages/CreatePatient')));
 
 const routes = [
   {
@@ -50,6 +51,12 @@ const routes = [
       <AuthGuard>
         <Example />
       </AuthGuard>
+    )
+  },
+  {
+    path: '/create_patient',
+    element: (
+        <CreatePatient />
     )
   }
 ]
