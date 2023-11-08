@@ -1,4 +1,4 @@
-import React, { useState } from 'react'
+import React, { useEffect, useState } from 'react'
 import useAuth from '../hooks/useAuth'
 import Button from '@mui/material/Button'
 import { useSnackbar } from 'notistack'
@@ -14,6 +14,8 @@ import * as Yup from 'yup'
 import TextField from '@mui/material/TextField'
 import { parseErrorMessage } from '../utils/errorMessage'
 import FormGroup from '@mui/material/FormGroup'
+import AppService from '../services/AppService'
+import PrivateKeyDialog from '../components/PrivateKeyDialog'
 
 const Dashboard = () => {
   const { logout } = useAuth()
@@ -23,6 +25,7 @@ const Dashboard = () => {
   const [publicKey, setPublicKey] = useState('')
   const [checkedPublic, setCheckedPublic] = useState(true)
   const [checkedPair, setCheckedPair] = useState(false)
+  const [open, setOpen] = useState(false)
 
   const Logout = async () => {
     await logout()
@@ -30,8 +33,8 @@ const Dashboard = () => {
     navigate('/login')
   }
 
-  const examplePageHandler = async () => {
-    navigate('/example')
+  const navigateHandler = async (url) => {
+    navigate(url)
   }
 
   const publicKeyValidationSchema = Yup.object({
@@ -43,6 +46,8 @@ const Dashboard = () => {
       await UserService.updatePublic({ publicKey: values.publicKey })
       resetForm()
       enqueueSnackbar('Public key submitted', { variant: 'success' })
+      enqueueSnackbar('Update your private key related to public key', { variant: 'error' })
+      setOpen(true)
     } catch (e) {
       enqueueSnackbar(parseErrorMessage(e), { variant: 'error' })
     }
@@ -58,6 +63,9 @@ const Dashboard = () => {
       enqueueSnackbar('Your old public key was rewrited', {
         variant: 'success'
       })
+      enqueueSnackbar('Update your private key', {
+        variant: 'error'
+      })
     } catch (e) {
       enqueueSnackbar(parseErrorMessage(e), { variant: 'error' })
     }
@@ -72,6 +80,8 @@ const Dashboard = () => {
           })
           setPrivateKey('')
         })
+        AppService.saveKey(key)
+        setOpen(true)
         break
       case 'public':
         navigator.clipboard.writeText(key).then(() => {
@@ -88,6 +98,7 @@ const Dashboard = () => {
 
   return (
     <div>
+      <PrivateKeyDialog open={open} setOpen={setOpen}/>
       <div>
         <Button
           onClick={Logout}
@@ -99,13 +110,13 @@ const Dashboard = () => {
           Log out
         </Button>
         <Button
-          onClick={examplePageHandler}
-          variant='outlined'
-          color='error'
+          onClick={() => navigateHandler('/create_patient')}
+          variant='contained'
+          color='info'
           size='large'
           style={{ margin: 5 }}
         >
-          Example Page
+          Create patient
         </Button>
       </div>
       <div className={styles.registerWrapper}>

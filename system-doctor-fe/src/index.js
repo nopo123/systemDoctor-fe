@@ -17,7 +17,7 @@ root.render(
       <ReduxProvider store={store}>
         <PersistGate loading={null} persistor={persistor}>
           <AuthProvider>
-            <SnackbarProvider maxSnack={2} autoHideDuration={1700}>
+            <SnackbarProvider maxSnack={3} autoHideDuration={1700}>
               <App />
             </SnackbarProvider>
           </AuthProvider>

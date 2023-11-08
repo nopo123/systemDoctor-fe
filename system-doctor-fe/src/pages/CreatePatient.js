@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import { useState } from 'react';
 import useAuth from '../hooks/useAuth'
 import { Form, Formik } from 'formik';
@@ -9,16 +9,17 @@ import Button from '@mui/material/Button';
 import { useSnackbar } from 'notistack';
 import { parseErrorMessage } from '../utils/errorMessage';
 import { useNavigate } from 'react-router-dom';
+import PrivateKeyDialog from '../components/PrivateKeyDialog';
+import PatientService from '../services/PatientService';
 
 
 const CreatePatient = () => {
   const { enqueueSnackbar } = useSnackbar();
   const navigate = useNavigate();
   const { logout } = useAuth()
-
+  const [open, setOpen] = useState(false);
   const [allergies, setAllergies] = useState(['']);
   const [diagnosis, setDiagnosis] = useState(['']);
-
 
   const handleInputChange = (index, value, state, setState) => {
     const newInputs = [...state];
@@ -39,10 +40,6 @@ const CreatePatient = () => {
     navigate('/login')
   }
 
-  const examplePageHandler = async () => {
-    navigate('/example')
-  }
-
   const dashboardPageHandler = async () => {
     navigate('/dashboard')
   }
@@ -52,8 +49,6 @@ const CreatePatient = () => {
     lastName: Yup.string().required('Last Name is required'),
     birthId: Yup.number()
       .required('Birth ID is required')
-      .positive('Birth ID must be a positive number')
-      .integer('Birth ID must be an integer')
       .test('len', 'Birth ID must have exactly 10 digits', (value) => value.toString().length === 10),
     residentialCity: Yup.string().required('Residential City is required'),
     street: Yup.string().required('Street is required'),
@@ -71,21 +66,28 @@ const CreatePatient = () => {
     allergies: '',
   };
 
-  const onSubmit = async (values, { setSubmitting, resetForm }) => {
+  const onSubmit = async (values, { resetForm }) => {
     try {
       values.allergies = allergies;
       values.diagnosis = diagnosis;
-      console.log('Submitted Data:', values);
+      let postData = { ...values };
+      postData.address = values.street + ', ' + values.residentialCity;
+      postData.birthId = postData.birthId.toString();
+      delete postData.street;
+      delete postData.residentialCity;
+      await PatientService.createPatient(postData);
       resetForm();
+      setAllergies(['']);
+      setDiagnosis(['']);
       enqueueSnackbar('Success', { variant: 'success' });
     } catch (error) {
       enqueueSnackbar(parseErrorMessage(error), { variant: 'error' });
     }
-    setSubmitting(false);
   };
 
   return (
     <div>
+      <PrivateKeyDialog open={open} setOpen={setOpen}/>
       <div>
         <Button
           onClick={Logout}
@@ -105,15 +107,6 @@ const CreatePatient = () => {
         >
           Dashboard
         </Button>
-        <Button
-          onClick={examplePageHandler}
-          variant='outlined'
-          color='error'
-          size='large'
-          style={{ margin: 5 }}
-        >
-          Example Page
-        </Button>
       </div>
       <div className={styles.registerWrapper}>
         <h1 className={styles.active}>Create Patient</h1>
@@ -129,7 +122,6 @@ const CreatePatient = () => {
             handleChange,
             handleBlur,
             isSubmitting,
-
           }) => (
             <Form>
               <div className={styles.input}>

@@ -8,6 +8,10 @@ class AppService {
 	static setTimeoutUser = (timeout) => window.localStorage.setItem('timeout', timeout);
 
 	static getTimeoutUser = () => window.localStorage.getItem('timeout');
+
+	static saveKey = (privateKey) => sessionStorage.setItem('privateKey', privateKey);
+
+	static getKey = () => sessionStorage.getItem('privateKey');
 }
 
 export default AppService;

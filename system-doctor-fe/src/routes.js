@@ -46,14 +46,6 @@ const routes = [
     )
   },
   {
-    path: '/example',
-    element: (
-      <AuthGuard>
-        <Example />
-      </AuthGuard>
-    )
-  },
-  {
     path: '/create_patient',
     element: (
         <CreatePatient />
