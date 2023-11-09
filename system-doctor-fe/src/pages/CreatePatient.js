@@ -51,8 +51,8 @@ const CreatePatient = () => {
     navigate('/login')
   }
 
-  const dashboardPageHandler = async () => {
-    navigate('/dashboard')
+  const navigateHandler = async (url) => {
+    navigate(url)
   }
 
   const validationSchema = Yup.object({
@@ -84,7 +84,6 @@ const CreatePatient = () => {
       values.diagnosis = diagnosis; 
       let postData = { ...values };
       postData.address = values.street + ', ' + values.residentialCity;
-      console.log(values); 
       delete postData.street;
       delete postData.residentialCity;
       resetForm();
@@ -113,13 +112,31 @@ const CreatePatient = () => {
           Log out
         </Button>
         <Button
-          onClick={dashboardPageHandler}
+          onClick={() => navigateHandler("/dashboard")}
           variant='contained'
           color='info'
           size='large'
           style={{ margin: 5 }}
         >
           Dashboard
+        </Button>
+        <Button
+          onClick={() => navigateHandler("/patientsList")}
+          variant='contained'
+          color='info'
+          size='large'
+          style={{ margin: 5 }}
+        >
+          List of patients
+        </Button>
+        <Button
+          onClick={() => setOpen(true)}
+          variant='contained'
+          color='info'
+          size='large'
+          style={{ margin: 5 }}
+        >
+          Update private key
         </Button>
       </div>
       <div className={styles.registerWrapper}>

@@ -118,6 +118,24 @@ const Dashboard = () => {
         >
           Create patient
         </Button>
+        <Button
+          onClick={() => navigateHandler("/patientsList")}
+          variant='contained'
+          color='info'
+          size='large'
+          style={{ margin: 5 }}
+        >
+          List of patients
+        </Button>
+        <Button
+          onClick={() => setOpen(true)}
+          variant='contained'
+          color='info'
+          size='large'
+          style={{ margin: 5 }}
+        >
+          Update private key
+        </Button>
       </div>
       <div className={styles.registerWrapper}>
         <h1>Key Management</h1>
