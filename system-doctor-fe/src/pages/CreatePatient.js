@@ -1,4 +1,4 @@
-import React, { useEffect } from 'react';
+import React from 'react';
 import { useState } from 'react';
 import useAuth from '../hooks/useAuth'
 import { Form, Formik } from 'formik';
@@ -34,6 +34,17 @@ const CreatePatient = () => {
     setDiagnosis((prevDiagnosis) => [...prevDiagnosis, '']);
   };
 
+  const handleRemoveAllergy = (index) => {
+    const newAllergies = [...allergies];
+    newAllergies.splice(index, 1);
+    setAllergies(newAllergies);
+  };
+  const handleRemoveDiagnosis = (index) => {
+    const newDiagnosis = [...diagnosis];
+    newDiagnosis.splice(index, 1);
+    setDiagnosis(newDiagnosis);
+  };
+
   const Logout = async () => {
     await logout()
     enqueueSnackbar('Logged out.', { variant: 'success' })
@@ -47,9 +58,10 @@ const CreatePatient = () => {
   const validationSchema = Yup.object({
     firstName: Yup.string().required('First Name is required'),
     lastName: Yup.string().required('Last Name is required'),
-    birthId: Yup.number()
+    birthId: Yup.string()
       .required('Birth ID is required')
-      .test('len', 'Birth ID must have exactly 10 digits', (value) => value.toString().length === 10),
+      .test('len', 'Birth ID must have exactly 10 digits', (value) => value.toString().length === 10)
+      .matches(/^[0-9]+$/, 'Birth ID must contain only numbers'),
     residentialCity: Yup.string().required('Residential City is required'),
     street: Yup.string().required('Street is required'),
     diagnosis: Yup.string().notRequired(), 
@@ -66,23 +78,25 @@ const CreatePatient = () => {
     allergies: '',
   };
 
-  const onSubmit = async (values, { resetForm }) => {
+  const onSubmit = async (values, { resetForm, setErrors, setTouched  }) => {
     try {
       values.allergies = allergies;
-      values.diagnosis = diagnosis;
+      values.diagnosis = diagnosis; 
       let postData = { ...values };
       postData.address = values.street + ', ' + values.residentialCity;
-      postData.birthId = postData.birthId.toString();
+      console.log(values); 
       delete postData.street;
       delete postData.residentialCity;
-      await PatientService.createPatient(postData);
       resetForm();
+      await PatientService.createPatient(postData);
       setAllergies(['']);
       setDiagnosis(['']);
       enqueueSnackbar('Success', { variant: 'success' });
     } catch (error) {
       enqueueSnackbar(parseErrorMessage(error), { variant: 'error' });
-    }
+      setErrors({});
+      setTouched({});
+    } 
   };
 
   return (
@@ -259,6 +273,7 @@ const CreatePatient = () => {
                         style: { color: 'black' },
                       }}
                     />
+                    {index > 0 && <Button onClick={() => handleRemoveAllergy(index)}>Remove</Button>}
                   </div>
                 ))}
                 <Button onClick={handleCombineAllergies}>Add Allergy</Button>
@@ -283,6 +298,7 @@ const CreatePatient = () => {
                         style: { color: 'black' },
                       }}
                     />
+                    {index > 0 && <Button onClick={() => handleRemoveDiagnosis(index)}>Remove</Button>}
                   </div>
                 ))}
                 <Button onClick={handleCombineDiagnosis}>Add Diagnosis</Button>
