@@ -45,6 +45,7 @@ const ListPatient = () => {
   const [patients, setPatients] = useState([]);
   const [modalOpen, setModalOpen] = React.useState(false);
   const [selectedPatient, setSelectedPatient] = React.useState(null);
+  const [searchTerm, setSearchTerm] = useState('');
 
   useEffect(() => {
     const fetchPatients = async () => {
@@ -257,6 +258,15 @@ const ListPatient = () => {
           Update private key
         </Button>
       </div>
+      <div style={{ margin: '20px 0' }}>
+        <TextField
+          label="Search by Birth ID"
+          variant="outlined"
+          fullWidth
+          value={searchTerm}
+          onChange={(e) => setSearchTerm(e.target.value)}
+        />
+      </div>
       <h1>LIST OF PATIENTS</h1>
       <StyledTableContainer component={Paper}>
         <Table sx={{ minWidth: 650 }} size="small" aria-label="a dense table">
@@ -271,7 +281,7 @@ const ListPatient = () => {
             </TableRow>
           </TableHead>
           <TableBody>
-            {patients.map((patient, index) => (
+            {patients.filter(patient => patient.birthId.includes(searchTerm)).map((patient, index) => (
               <TableRow
                 key={index}
                 sx={{ '&:last-child td, &:last-child th': { border: 0 } }}
