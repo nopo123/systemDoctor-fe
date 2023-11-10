@@ -56,7 +56,7 @@ const Dashboard = () => {
 
   const onClickGeneratePair = async () => {
     try {
-      const keys = await CypherService.generateKeyPair()
+      const keys = await CypherService.generateKeyPair();
       setPrivateKey(keys.privateKey)
       setPublicKey(keys.publicKey)
       enqueueSnackbar('Key pair generated', { variant: 'success' })

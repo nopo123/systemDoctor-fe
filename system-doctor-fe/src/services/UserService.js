@@ -8,6 +8,10 @@ class UserService {
   static me = () => api.get('/users/me');
   
   static updatePublic = (data) => api.post('users/updatePublic', data);
+
+  static getPatients = () => api.get('/users/patients');
+
+  static deletePatient = (birthId) => api.delete('/users/patients/'+birthId);
 }
 
 export default UserService;
