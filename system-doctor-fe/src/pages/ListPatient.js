@@ -28,7 +28,7 @@ import FormControl from '@mui/material/FormControl';
 import InputLabel from '@mui/material/InputLabel';
 import { Container } from '@mui/material';
 import RequestService from '../services/RequestService'
-import { parseErrorMessage } from '../utils/errorMessage'
+import { styled } from '@mui/material/styles';
 
 
 function createData(birthId, lastName, firstName, address, diagnosis) {
@@ -57,8 +57,7 @@ const ListPatient = () => {
           return
         }
         const patientRows = parsedData.message.map(patient => createData(patient.birthId, patient.lastName, patient.firstName, patient.address, patient.diagnosis));
-        setPatients(patientRows); // Update state with formatted patient data
-        console.log(parsedData);
+        setPatients(patientRows); 
       } catch (error) {
         console.error("Error fetching patients:", error);
         // Handle error (e.g., show error notification)
@@ -80,7 +79,6 @@ const ListPatient = () => {
 
   const handleDelete = async (birthId) => {
     try {
-      console.log(birthId);
       await UserService.deletePatient(birthId);
       const updatedPatients = patients.filter(patient => patient.birthId !== birthId);
       setPatients(updatedPatients);
@@ -90,6 +88,22 @@ const ListPatient = () => {
       // Handle error (e.g., show error notification)
     }
   };
+
+  const StyledTableContainer = styled(TableContainer)(({ theme }) => ({
+    boxShadow: '0px 4px 10px rgba(0, 0, 0, 0.1)',
+  }));
+  
+  // Custom styling for TableHead
+  const StyledTableCellHead = styled(TableCell)(({ theme }) => ({
+    backgroundColor: theme.palette.primary.main,
+    color: theme.palette.common.white,
+    fontWeight: 'bold',
+  }));
+  
+  // Custom styling for TableBody
+  const StyledTableCellBody = styled(TableCell)(({ theme }) => ({
+    fontSize: '0.875rem',
+  }));
 
   const navigateHandler = async (url) => {
     navigate(url)
@@ -243,16 +257,17 @@ const ListPatient = () => {
           Update private key
         </Button>
       </div>
-      <TableContainer component={Paper}>
+      <h1>LIST OF PATIENTS</h1>
+      <StyledTableContainer component={Paper}>
         <Table sx={{ minWidth: 650 }} size="small" aria-label="a dense table">
           <TableHead>
             <TableRow>
-              <TableCell>Birth Id</TableCell>
-              <TableCell align="right">Last Name</TableCell>
-              <TableCell align="right">First Name</TableCell>
-              <TableCell align="right">Address</TableCell>
-              <TableCell align="right">Request</TableCell>
-              <TableCell align="right">Actions</TableCell>
+              <StyledTableCellHead>Birth Id</StyledTableCellHead>
+              <StyledTableCellHead align="right">Last Name</StyledTableCellHead>
+              <StyledTableCellHead align="right">First Name</StyledTableCellHead>
+              <StyledTableCellHead align="right">Address</StyledTableCellHead>
+              <StyledTableCellHead align="right">Request</StyledTableCellHead>
+              <StyledTableCellHead align="right">Actions</StyledTableCellHead>
             </TableRow>
           </TableHead>
           <TableBody>
@@ -261,22 +276,22 @@ const ListPatient = () => {
                 key={index}
                 sx={{ '&:last-child td, &:last-child th': { border: 0 } }}
               >
-                <TableCell component="th" scope="row">
+                <StyledTableCellBody component="th" scope="row">
                   {patient.birthId}
-                </TableCell>
-                <TableCell align="right">{patient.lastName}</TableCell>
-                <TableCell align="right">{patient.firstName}</TableCell>
-                <TableCell align="right">{patient.address}</TableCell>
-                <TableCell align="right"> <AddCircleIcon onClick={() => handleOpenModal(patient)} /> {/* New Icon for adding request */}</TableCell>
-                <TableCell align="right">
-                  <DeleteIcon onClick={() => handleDelete(patient.birthId)} />
-                  <EditIcon />   {/* Add onClick handler for editing */}
-                </TableCell>
+                </StyledTableCellBody>
+                <StyledTableCellBody align="right">{patient.lastName}</StyledTableCellBody>
+                <StyledTableCellBody align="right">{patient.firstName}</StyledTableCellBody>
+                <StyledTableCellBody align="right">{patient.address}</StyledTableCellBody>
+                <StyledTableCellBody align="right"> <AddCircleIcon onClick={() => handleOpenModal(patient)} style={{ cursor: 'pointer' }} /> {/* New Icon for adding request */}</StyledTableCellBody>
+                <StyledTableCellBody align="right">
+                  <DeleteIcon onClick={() => handleDelete(patient.birthId)} style={{ cursor: 'pointer' }}/>
+                  <EditIcon style={{ cursor: 'pointer' }}/>   {/* Add onClick handler for editing */}
+                </StyledTableCellBody>
               </TableRow>
             ))}
           </TableBody>
         </Table>
-      </TableContainer>
+      </StyledTableContainer>
       <RequestModal open={modalOpen} handleClose={handleCloseModal} patient={selectedPatient} />
     </div>
   )
