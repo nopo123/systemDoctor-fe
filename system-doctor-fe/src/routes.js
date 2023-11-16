@@ -61,7 +61,7 @@ const routes = [
         <ListPatient />
       </AuthGuard>
     )
-  }
+  },
 ]
 
 export default routes

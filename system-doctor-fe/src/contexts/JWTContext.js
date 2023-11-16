@@ -1,6 +1,8 @@
 import { createContext, useEffect, useReducer } from 'react';
 import UserService from '../services/UserService';
 import AppService from '../services/AppService';
+import { parseErrorMessage } from '../utils/errorMessage';
+import { useSnackbar } from 'notistack';
 
 const initialState = {
   isAuthenticated: false,
@@ -48,6 +50,7 @@ const AuthContext = createContext({
 export const AuthProvider = (props) => {
   const { children } = props;
   const [state, dispatch] = useReducer(reducer, initialState);
+  const { enqueueSnackbar } = useSnackbar();
 
   useEffect(() => {
     const initialize = async () => {
@@ -64,7 +67,7 @@ export const AuthProvider = (props) => {
             },
           });
         } catch (e) {
-          console.error("Error authentication:");
+          enqueueSnackbar(parseErrorMessage(e), { variant: 'error' })
         }
         const user = await UserService.me();
       } else {
@@ -95,15 +98,15 @@ export const AuthProvider = (props) => {
           },
         });
       } else {
-        console.log("Response is missing accessToken:", res);
+        enqueueSnackbar('Login failed', { variant: 'error' })
       }
     } catch (e) {
-      console.error("Error in login function:", e);
-      throw e; // Rethrow the error for further handling
+      enqueueSnackbar(parseErrorMessage(e), { variant: 'error' })
     }
   };
 
   const logout = async () => {
+    AppService.clearKey();
     AppService.clearToken();
     dispatch({ type: 'LOGOUT' });
   };

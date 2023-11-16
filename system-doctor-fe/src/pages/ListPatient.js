@@ -29,6 +29,7 @@ import InputLabel from '@mui/material/InputLabel';
 import { Container } from '@mui/material';
 import RequestService from '../services/RequestService'
 import { styled } from '@mui/material/styles';
+import { parseErrorMessage } from '../utils/errorMessage';
 
 
 function createData(birthId, lastName, firstName, address, diagnosis) {
@@ -60,8 +61,7 @@ const ListPatient = () => {
         const patientRows = parsedData.message.map(patient => createData(patient.birthId, patient.lastName, patient.firstName, patient.address, patient.diagnosis));
         setPatients(patientRows); 
       } catch (error) {
-        console.error("Error fetching patients:", error);
-        // Handle error (e.g., show error notification)
+        enqueueSnackbar(parseErrorMessage(error), { variant: 'error' })
       }
     };
 
@@ -108,6 +108,11 @@ const ListPatient = () => {
 
   const navigateHandler = async (url) => {
     navigate(url)
+  }
+
+  const navigateDetail = async (id) => {
+    // TODO  create patient detail page and navigate to it
+    navigate(`/patient/${id}`)
   }
 
   const Logout = async () => {
@@ -295,7 +300,7 @@ const ListPatient = () => {
                 <StyledTableCellBody align="right"> <AddCircleIcon onClick={() => handleOpenModal(patient)} style={{ cursor: 'pointer' }} /> {/* New Icon for adding request */}</StyledTableCellBody>
                 <StyledTableCellBody align="right">
                   <DeleteIcon onClick={() => handleDelete(patient.birthId)} style={{ cursor: 'pointer' }}/>
-                  <EditIcon style={{ cursor: 'pointer' }}/>   {/* Add onClick handler for editing */}
+                  <EditIcon style={{ cursor: 'pointer' }} onClick={() => navigateDetail(patient.id)}/>   {/* Add onClick handler for editing */}
                 </StyledTableCellBody>
               </TableRow>
             ))}

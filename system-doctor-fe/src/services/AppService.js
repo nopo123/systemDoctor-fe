@@ -12,6 +12,8 @@ class AppService {
 	static saveKey = (privateKey) => sessionStorage.setItem('privateKey', privateKey);
 
 	static getKey = () => sessionStorage.getItem('privateKey');
+
+	static clearKey = () => sessionStorage.removeItem('privateKey');
 }
 
 export default AppService;

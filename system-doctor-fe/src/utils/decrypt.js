@@ -46,7 +46,6 @@ export const fetchData = (privateKey, _data) => {
       message: JSON.parse(decryptedData)
     };
   } catch (e) {
-    console.error(e);
     return {
       error: 'Could not decrypt data, wrong public key or private key',
       message: null,
