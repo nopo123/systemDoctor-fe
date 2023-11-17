@@ -31,7 +31,6 @@ const PatientDetail = () => {
       try {
         const fetchedPatient = await UserService.getPatientById(id);
         
-        // Normalize the data to ensure arrays don't contain empty strings
         const normalizeArray = (arr) => arr.filter(item => item.trim() !== '');
         
         setPatient({
@@ -40,9 +39,7 @@ const PatientDetail = () => {
           diagnosis: normalizeArray(fetchedPatient.diagnosis),
           medicalResults: normalizeArray(fetchedPatient.medicalResults),
         });
-        console.log(fetchedPatient);
       } catch (error) {
-        // Handle the error appropriately
         console.error('Error fetching patient details:', error);
       }
     };
@@ -61,7 +58,7 @@ const PatientDetail = () => {
         const imgData = canvas.toDataURL('image/png');
         const pdf = new jsPDF();
         pdf.addImage(imgData, 'PNG', 0, 0);
-        pdf.save("patient-details.pdf");
+        pdf.save(`patient-details{${patient.birthId}}`);
       });
   }
 
