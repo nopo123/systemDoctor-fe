@@ -111,7 +111,6 @@ const ListPatient = () => {
   }
 
   const navigateDetail = async (id) => {
-    // TODO  create patient detail page and navigate to it
     navigate(`/patient/${id}`)
   }
 
@@ -300,7 +299,7 @@ const ListPatient = () => {
                 <StyledTableCellBody align="right"> <AddCircleIcon onClick={() => handleOpenModal(patient)} style={{ cursor: 'pointer' }} /> {/* New Icon for adding request */}</StyledTableCellBody>
                 <StyledTableCellBody align="right">
                   <DeleteIcon onClick={() => handleDelete(patient.birthId)} style={{ cursor: 'pointer' }}/>
-                  <EditIcon style={{ cursor: 'pointer' }} onClick={() => navigateDetail(patient.id)}/>   {/* Add onClick handler for editing */}
+                  <EditIcon style={{ cursor: 'pointer' }} onClick={() => navigateDetail(patient.birthId)}/>   {/* Add onClick handler for editing */}
                 </StyledTableCellBody>
               </TableRow>
             ))}

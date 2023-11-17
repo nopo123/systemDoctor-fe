@@ -16,6 +16,7 @@ const Dashboard = Loadable(lazy(() => import('./pages/Dashboard')));
 const Example = Loadable(lazy(() => import('./pages/Example')));
 const CreatePatient = Loadable(lazy(() => import('./pages/CreatePatient')));
 const ListPatient = Loadable(lazy(() => import('./pages/ListPatient')));
+const PatientDetail = Loadable(lazy(() => import('./pages/PatientDetail')));
 
 const routes = [
   {
@@ -59,6 +60,14 @@ const routes = [
     element: (
       <AuthGuard>
         <ListPatient />
+      </AuthGuard>
+    )
+  },
+  {
+    path: '/patient/:id', 
+    element: (
+      <AuthGuard>
+        <PatientDetail />
       </AuthGuard>
     )
   },

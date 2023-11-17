@@ -11,6 +11,8 @@ class UserService {
 
   static getPatients = () => api.get('/users/patients');
 
+  static getPatientById = (birthId) => api.get('/users/patients/'+birthId);
+
   static deletePatient = (birthId) => api.delete('/users/patients/'+birthId);
 }
 
