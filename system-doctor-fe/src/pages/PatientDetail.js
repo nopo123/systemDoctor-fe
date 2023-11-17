@@ -6,6 +6,8 @@ import { useSnackbar } from 'notistack'
 import { useNavigate } from 'react-router-dom'
 import useAuth from '../hooks/useAuth'
 import PictureAsPdfIcon from '@mui/icons-material/PictureAsPdf';
+import { jsPDF } from "jspdf";
+import html2canvas from "html2canvas";
 
 const PatientDetail = () => {
   const { id } = useParams();
@@ -52,6 +54,17 @@ const PatientDetail = () => {
     return <div>Loading...</div>;
   }
 
+  const exportPDF = () => {
+    const input = document.getElementById('divToPDF');
+    html2canvas(input)
+      .then((canvas) => {
+        const imgData = canvas.toDataURL('image/png');
+        const pdf = new jsPDF();
+        pdf.addImage(imgData, 'PNG', 0, 0);
+        pdf.save("patient-details.pdf");
+      });
+  }
+
   return (
     <div>
       <div>
@@ -94,8 +107,8 @@ const PatientDetail = () => {
       </div>
       <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', marginBottom: '20px' }}>
     <h1 style={{ borderBottom: '2px solid black', paddingBottom: '5px', marginTop: '20px' }}>Patient Details</h1>
-    <PictureAsPdfIcon style={{cursor: 'pointer' }} onClick={() => console.log("PDF")}/>
-    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '40px', marginTop: '20px' }}>
+    <PictureAsPdfIcon style={{cursor: 'pointer' }} onClick={exportPDF}/>
+    <div id='divToPDF' style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '40px', marginTop: '20px' }}>
       {/* Patient Name */}
       <div>
         <h2>Name</h2>
