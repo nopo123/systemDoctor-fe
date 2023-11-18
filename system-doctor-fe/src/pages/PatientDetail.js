@@ -6,8 +6,12 @@ import { useSnackbar } from 'notistack'
 import { useNavigate } from 'react-router-dom'
 import useAuth from '../hooks/useAuth'
 import PictureAsPdfIcon from '@mui/icons-material/PictureAsPdf';
-import { jsPDF } from "jspdf";
-import html2canvas from "html2canvas";
+import AddCircleIcon from '@mui/icons-material/AddCircle';
+import CancelIcon from '@mui/icons-material/Cancel';
+import CheckIcon from '@mui/icons-material/Check';
+import EditIcon from '@mui/icons-material/Edit';
+import { Dialog, DialogContent, DialogTitle, DialogActions } from '@mui/material';
+import TextField from '@mui/material/TextField';
 
 const PatientDetail = () => {
   const { id } = useParams();
@@ -15,6 +19,19 @@ const PatientDetail = () => {
   const { enqueueSnackbar } = useSnackbar()
   const navigate = useNavigate()
   const { logout } = useAuth()
+
+  // Dialog management
+  const [isNameEditModalOpen, setIsNameEditModalOpen] = useState(false);
+  const [editedName, setEditedName] = useState('');
+  const [isAddressEditModalOpen, setIsAddressEditModalOpen] = useState(false);
+  const [editedAddress, setEditedAddress] = useState('');
+  const [isDiagnosesEditModalOpen, setIsDiagnosesEditModalOpen] = useState(false);
+  const [editedDiagnoses, setEditedDiagnoses] = useState([]);
+  const [isAllergiesEditModalOpen, setIsAllergiesEditModalOpen] = useState(false);
+  const [editedAllergies, setEditedAllergies] = useState([]);
+
+  const [newAllergy, setNewAllergy] = useState('');
+  const [newDiagnosis, setNewDiagnosis] = useState('');
 
   const Logout = async () => {
     await logout()
@@ -25,6 +42,154 @@ const PatientDetail = () => {
   const navigateHandler = async (url) => {
     navigate(url)
   }
+
+  const handleOpenNameEditModal = () => {
+    setEditedName(`${patient.firstName} ${patient.lastName}`);
+    setIsNameEditModalOpen(true);
+  };
+
+  const handleCloseNameEditModal = () => {
+    setIsNameEditModalOpen(false);
+  };
+
+  const updatePatientName = async () => {
+    try {
+      const [firstName, lastName] = editedName.split(' '); 
+      const updatedData = {
+        ...patient, 
+        firstName, 
+        lastName, 
+      };
+
+      const fetchedPatient = await UserService.updatePatient(id, updatedData);
+      enqueueSnackbar('Patient name updated successfully', { variant: 'success' });
+  
+      const normalizeArray = (arr) => arr.filter(item => item.trim() !== '');
+
+      setPatient({
+        ...fetchedPatient,
+        allergies: normalizeArray(fetchedPatient.allergies),
+        diagnosis: normalizeArray(fetchedPatient.diagnosis),
+        medicalResults: normalizeArray(fetchedPatient.medicalResults),
+      });
+  
+      handleCloseNameEditModal();
+    } catch (error) {
+      enqueueSnackbar('Error updating patient name', { variant: 'error' });
+    }
+  };
+
+  const handleOpenAddressEditModal = () => {
+    setEditedAddress(patient.address);
+    setIsAddressEditModalOpen(true);
+  };
+
+  // Function to close the address edit modal
+  const handleCloseAddressEditModal = () => {
+    setIsAddressEditModalOpen(false);
+  };
+
+  const updatePatientAddress = async () => {
+    try {
+      const updatedData = {
+        ...patient,
+        address: editedAddress,
+      };
+
+      await UserService.updatePatient(id, updatedData);
+      enqueueSnackbar('Patient address updated successfully', { variant: 'success' });
+
+      setPatient(prev => ({
+        ...prev,
+        address: editedAddress,
+      }));
+
+      handleCloseAddressEditModal();
+    } catch (error) {
+      enqueueSnackbar('Error updating patient address', { variant: 'error' });
+    }
+  };
+
+  const handleOpenDiagnosesEditModal = () => {
+    setEditedDiagnoses([...patient.diagnosis]); 
+    setIsDiagnosesEditModalOpen(true);
+  };
+
+  const handleCloseDiagnosesEditModal = () => {
+    setIsDiagnosesEditModalOpen(false);
+  };
+
+  const handleRemoveDiagnosis = (index) => {
+    setEditedDiagnoses((currentDiagnoses) => currentDiagnoses.filter((_, i) => i !== index));
+  };
+
+  const handleAddDiagnosis = (newDiagnosis) => {
+    if (newDiagnosis && !editedDiagnoses.includes(newDiagnosis)) {
+      setEditedDiagnoses((currentDiagnoses) => [...currentDiagnoses, newDiagnosis]);
+    }
+  };
+
+  const updatePatientDiagnoses = async () => {
+    try {
+      const updatedData = {
+        ...patient,
+        diagnosis: editedDiagnoses,
+      };
+
+      await UserService.updatePatient(id, updatedData);
+      enqueueSnackbar('Patient diagnoses updated successfully', { variant: 'success' });
+
+      setPatient((prev) => ({
+        ...prev,
+        diagnosis: editedDiagnoses,
+      }));
+
+      handleCloseDiagnosesEditModal();
+    } catch (error) {
+      enqueueSnackbar('Error updating patient diagnoses', { variant: 'error' });
+    }
+  };
+
+  const handleOpenAllergiesEditModal = () => {
+    setEditedAllergies([...patient.allergies]); 
+    setIsAllergiesEditModalOpen(true);
+  };
+
+  const handleCloseAllergiesEditModal = () => {
+    setIsAllergiesEditModalOpen(false);
+  };
+
+  const handleRemoveAllergy = (index) => {
+    setEditedAllergies((currentAllergies) => currentAllergies.filter((_, i) => i !== index));
+  };
+
+  const handleAddAllergy = (newAllergy) => {
+    if (newAllergy && !editedAllergies.includes(newAllergy)) {
+      setEditedAllergies((currentAllergies) => [...currentAllergies, newAllergy]);
+      setNewAllergy(''); 
+    }
+  };
+
+  const updatePatientAllergies = async () => {
+    try {
+      const updatedData = {
+        ...patient,
+        allergies: editedAllergies,
+      };
+
+      await UserService.updatePatient(id, updatedData);
+      enqueueSnackbar('Patient allergies updated successfully', { variant: 'success' });
+
+      setPatient((prev) => ({
+        ...prev,
+        allergies: editedAllergies,
+      }));
+
+      handleCloseAllergiesEditModal();
+    } catch (error) {
+      enqueueSnackbar('Error updating patient allergies', { variant: 'error' });
+    }
+  };
 
   useEffect(() => {
     const fetchPatient = async () => {
@@ -52,14 +217,7 @@ const PatientDetail = () => {
   }
 
   const exportPDF = () => {
-    const input = document.getElementById('divToPDF');
-    html2canvas(input)
-      .then((canvas) => {
-        const imgData = canvas.toDataURL('image/png');
-        const pdf = new jsPDF();
-        pdf.addImage(imgData, 'PNG', 0, 0);
-        pdf.save(`patient-details{${patient.birthId}}`);
-      });
+    // TODO: PDF
   }
 
   return (
@@ -103,20 +261,59 @@ const PatientDetail = () => {
         </Button>
       </div>
       <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', marginBottom: '20px' }}>
-    <h1 style={{ borderBottom: '2px solid black', paddingBottom: '5px', marginTop: '20px' }}>Patient Details</h1>
-    <PictureAsPdfIcon style={{cursor: 'pointer' }} onClick={exportPDF}/>
+    <h1 style={{ borderBottom: '2px solid black', paddingBottom: '5px', marginTop: '20px' }}>Patient Details <PictureAsPdfIcon style={{cursor: 'pointer' }} onClick={exportPDF}/></h1>
     <div id='divToPDF' style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '40px', marginTop: '20px' }}>
       {/* Patient Name */}
       <div>
-        <h2>Name</h2>
+        <h2>Name <EditIcon style={{cursor: 'pointer' }} onClick={handleOpenNameEditModal}/></h2>
         <p>{patient.firstName} {patient.lastName}</p>
       </div>
+      <Dialog open={isNameEditModalOpen} onClose={handleCloseNameEditModal}>
+        <DialogTitle>Edit Name</DialogTitle>
+        <DialogContent>
+          <TextField
+            autoFocus
+            margin="dense"
+            id="name"
+            label="Full Name"
+            type="text"
+            fullWidth
+            variant="standard"
+            value={editedName}
+            onChange={(e) => setEditedName(e.target.value)}
+          />
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={handleCloseNameEditModal}>Cancel</Button>
+          <Button onClick={updatePatientName}>Update</Button>
+        </DialogActions>
+      </Dialog>
       
       {/* Address */}
       <div>
-        <h2>Address</h2>
+        <h2>Address <EditIcon style={{cursor: 'pointer' }} onClick={handleOpenAddressEditModal}/></h2>
         <p>{patient.address}</p>
       </div>
+      <Dialog open={isAddressEditModalOpen} onClose={handleCloseAddressEditModal}>
+        <DialogTitle>Edit Address</DialogTitle>
+        <DialogContent>
+          <TextField
+            autoFocus
+            margin="dense"
+            id="address"
+            label="Address"
+            type="text"
+            fullWidth
+            variant="standard"
+            value={editedAddress}
+            onChange={(e) => setEditedAddress(e.target.value)}
+          />
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={handleCloseAddressEditModal}>Cancel</Button>
+          <Button onClick={updatePatientAddress}>Update</Button>
+        </DialogActions>
+      </Dialog>
       
       {/* Birth ID */}
       <div>
@@ -126,27 +323,99 @@ const PatientDetail = () => {
       
       {/* Diagnosis List */}
       <div>
-        <h2>Diagnosis</h2>
+        <h2>Diagnosis <AddCircleIcon style={{cursor: 'pointer' }} onClick={handleOpenDiagnosesEditModal}/></h2>
         <ul style={{listStyleType: 'none', paddingLeft: 0}}>
           {patient.diagnosis.length ? patient.diagnosis.map((diagnosis, index) => (
             <li key={index}>{diagnosis}</li>
           )) : <p>No diagnosis available</p>}
         </ul>
       </div>
+      <Dialog open={isDiagnosesEditModalOpen} onClose={handleCloseDiagnosesEditModal} fullWidth maxWidth="sm">
+        <DialogTitle>Edit Diagnoses</DialogTitle>
+        <DialogContent>
+          {editedDiagnoses.map((diagnosis, index) => (
+            <div key={index} style={{ display: 'flex', alignItems: 'center', marginBottom: 8 }}>
+              <p style={{ flexGrow: 1, margin: 0 }}>{diagnosis}</p>
+              <CancelIcon style={{ cursor: 'pointer' }} onClick={() => handleRemoveDiagnosis(index)} />
+            </div>
+          ))}
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+          <TextField
+            margin="dense"
+            id="new-diagnosis"
+            label="New Diagnosis"
+            type="text"
+            variant="standard"
+            value={newDiagnosis}
+            onChange={(e) => setNewDiagnosis(e.target.value)}
+            style={{ flex: 1, marginRight: '8px' }} 
+          />
+          <Button
+            onClick={() => {
+              handleAddDiagnosis(newDiagnosis);
+              setNewDiagnosis(''); 
+            }}
+            color="primary"
+            style={{ padding: '6px' }} 
+          >
+            <CheckIcon />
+          </Button>
+        </div>
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={handleCloseDiagnosesEditModal}>Cancel</Button>
+          <Button onClick={updatePatientDiagnoses}>Save</Button>
+        </DialogActions>
+      </Dialog>
       
       {/* Allergies List */}
       <div>
-        <h2>Allergies</h2>
+        <h2>Allergies <AddCircleIcon style={{cursor: 'pointer' }} onClick={handleOpenAllergiesEditModal}/></h2>
         <ul style={{listStyleType: 'none', paddingLeft: 0}}>
           {patient.allergies.length ? patient.allergies.map((allergy, index) => (
             <li key={index}>{allergy}</li>
           )) : <p>No allergies reported</p>}
         </ul>
       </div>
+
+      <Dialog open={isAllergiesEditModalOpen} onClose={handleCloseAllergiesEditModal} fullWidth maxWidth="sm">
+        <DialogTitle>Edit Allergies</DialogTitle>
+        <DialogContent>
+          {editedAllergies.map((allergy, index) => (
+            <div key={index} style={{ display: 'flex', alignItems: 'center', marginBottom: 8 }}>
+              <p style={{ flexGrow: 1, margin: 0 }}>{allergy}</p>
+              <CancelIcon style={{ cursor: 'pointer' }} onClick={() => handleRemoveAllergy(index)} />
+            </div>
+          ))}
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+            <TextField
+              margin="dense"
+              id="new-allergy"
+              label="New Allergy"
+              type="text"
+              variant="standard"
+              value={newAllergy}
+              onChange={(e) => setNewAllergy(e.target.value)}
+              style={{ flex: 1, marginRight: '8px' }} 
+            />
+            <Button
+              onClick={() => handleAddAllergy(newAllergy)}
+              color="primary"
+              style={{ padding: '6px' }} 
+            >
+              <CheckIcon />
+            </Button>
+          </div>
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={handleCloseAllergiesEditModal}>Cancel</Button>
+          <Button onClick={updatePatientAllergies}>Save</Button>
+        </DialogActions>
+      </Dialog>
       
       {/* Medical Results */}
       <div>
-        <h2>Medical Results</h2>
+        <h2>Medical Results <AddCircleIcon style={{cursor: 'pointer' }} onClick={exportPDF}/></h2>
         {patient.medicalResults.length ? patient.medicalResults.map((result, index) => (
           <div key={index} style={{ marginBottom: '10px' }}>
             <h3>{result.testName}</h3>

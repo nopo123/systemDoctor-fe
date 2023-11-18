@@ -13,6 +13,8 @@ class UserService {
 
   static getPatientById = (birthId) => api.get('/users/patients/'+birthId);
 
+  static updatePatient = (birthId, data) => api.put('/users/patients/' + birthId, data);
+
   static deletePatient = (birthId) => api.delete('/users/patients/'+birthId);
 }
 
