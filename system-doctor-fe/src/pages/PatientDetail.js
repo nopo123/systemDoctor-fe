@@ -29,7 +29,10 @@ const PatientDetail = () => {
   const [editedDiagnoses, setEditedDiagnoses] = useState([]);
   const [isAllergiesEditModalOpen, setIsAllergiesEditModalOpen] = useState(false);
   const [editedAllergies, setEditedAllergies] = useState([]);
+  const [isMedicalResultsEditModalOpen, setIsMedicalResultsEditModalOpen] = useState(false);
+  const [editedMedicalResults, setEditedMedicalResults] = useState([]);
 
+  const [newMedicalResult, setNewMedicalResult] = useState({ title: '', text: '' });
   const [newAllergy, setNewAllergy] = useState('');
   const [newDiagnosis, setNewDiagnosis] = useState('');
 
@@ -84,7 +87,6 @@ const PatientDetail = () => {
     setIsAddressEditModalOpen(true);
   };
 
-  // Function to close the address edit modal
   const handleCloseAddressEditModal = () => {
     setIsAddressEditModalOpen(false);
   };
@@ -188,6 +190,53 @@ const PatientDetail = () => {
       handleCloseAllergiesEditModal();
     } catch (error) {
       enqueueSnackbar('Error updating patient allergies', { variant: 'error' });
+    }
+  };
+
+  const handleOpenMedicalResultsEditModal = () => {
+    setEditedMedicalResults([...patient.medicalResults]);
+    setIsMedicalResultsEditModalOpen(true);
+  };
+
+  const handleCloseMedicalResultsEditModal = () => {
+    setIsMedicalResultsEditModalOpen(false);
+  };
+
+  const handleAddMedicalResult = () => {
+    console.log(newMedicalResult)
+    console.log(newMedicalResult.text)
+    console.log(newMedicalResult.title)
+    setEditedMedicalResults((currentMedicalResults) => [
+      ...currentMedicalResults,
+      newMedicalResult,
+    ]);
+    setNewMedicalResult({ title: '', text: '' }); 
+  };
+
+  const handleRemoveMedicalResult = (index) => {
+    setEditedMedicalResults((currentMedicalResults) =>
+      currentMedicalResults.filter((_, i) => i !== index)
+    );
+  };
+  
+  const updatePatientMedicalResults = async () => {
+    try {
+      const updatedData = {
+        ...patient,
+        medicalResults: editedMedicalResults,
+      };
+  
+      await UserService.updatePatient(id, updatedData);
+      enqueueSnackbar('Patient medical results updated successfully', { variant: 'success' });
+  
+      setPatient((prev) => ({
+        ...prev,
+        medicalResults: editedMedicalResults,
+      }));
+  
+      handleCloseMedicalResultsEditModal();
+    } catch (error) {
+      enqueueSnackbar('Error updating patient medical results', { variant: 'error' });
     }
   };
 
@@ -415,16 +464,68 @@ const PatientDetail = () => {
       
       {/* Medical Results */}
       <div>
-        <h2>Medical Results <AddCircleIcon style={{cursor: 'pointer' }} onClick={exportPDF}/></h2>
+        <h2>Medical Results <AddCircleIcon style={{cursor: 'pointer' }} onClick={handleOpenMedicalResultsEditModal}/></h2>
         {patient.medicalResults.length ? patient.medicalResults.map((result, index) => (
-          <div key={index} style={{ marginBottom: '10px' }}>
-            <h3>{result.testName}</h3>
+          <div key={index} style={{ padding: '10px', border: '1px solid #ccc', // Add a border
+          borderRadius: '4px' }}>
+            <h3>{result.title}</h3>
             <p>Date: {result.date}</p>
-            <p>Result: {result.result}</p>
-            <p>Doctor's Notes: {result.doctorsNotes}</p>
+            <p>Text: {result.text}</p>
           </div>
         )) : <p>No medical results found</p>}
       </div>
+      <Dialog open={isMedicalResultsEditModalOpen} onClose={handleCloseMedicalResultsEditModal} fullWidth maxWidth="md">
+        <DialogTitle>Edit Medical Results</DialogTitle>
+        <DialogContent>
+          {editedMedicalResults.map((result, index) => (
+            <div key={index} style={{ display: 'flex', alignItems: 'center', marginBottom: 8, border: '1px solid #ccc', // Add a border
+            borderRadius: '4px' }}>
+              <div style={{ flexGrow: 1 }}>
+                <p><strong>Title:</strong> {result.title}</p>
+                <p><strong>Text:</strong> {result.text}</p>
+              </div>
+              <CancelIcon style={{ cursor: 'pointer' }} onClick={() => handleRemoveMedicalResult(index)} />
+            </div>
+          ))}
+          {/* Inputs for adding a new medical result */}
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
+            <TextField
+              margin="dense"
+              id="new-medical-result-title"
+              label="Title"
+              type="text"
+              fullWidth
+              variant="standard"
+              value={newMedicalResult.title}
+              onChange={(e) => setNewMedicalResult({ ...newMedicalResult, title: e.target.value })}
+            />
+            <TextField
+              margin="dense"
+              id="new-medical-result-text"
+              label="Text"
+              type="text"
+              multiline
+              rows={4}
+              fullWidth
+              variant="standard"
+              value={newMedicalResult.text}
+              onChange={(e) => setNewMedicalResult({ ...newMedicalResult, text: e.target.value })}
+            />
+            <Button
+              onClick={handleAddMedicalResult}
+              color="primary"
+              variant="contained"
+              startIcon={<CheckIcon />}
+            >
+              Add Result
+            </Button>
+          </div>
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={handleCloseMedicalResultsEditModal}>Cancel</Button>
+          <Button onClick={updatePatientMedicalResults}>Save</Button>
+        </DialogActions>
+      </Dialog>
     </div>
   </div>
     </div>
