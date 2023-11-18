@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { useParams } from 'react-router-dom';
 import UserService from '../services/UserService'
+import PatientService from '../services/PatientService';
 import Button from '@mui/material/Button'
 import { useSnackbar } from 'notistack'
 import { useNavigate } from 'react-router-dom'
@@ -63,18 +64,15 @@ const PatientDetail = () => {
         firstName, 
         lastName, 
       };
-
-      const fetchedPatient = await UserService.updatePatient(id, updatedData);
+      
+      await PatientService.updatePatient(id, updatedData);
       enqueueSnackbar('Patient name updated successfully', { variant: 'success' });
   
-      const normalizeArray = (arr) => arr.filter(item => item.trim() !== '');
-
-      setPatient({
-        ...fetchedPatient,
-        allergies: normalizeArray(fetchedPatient.allergies),
-        diagnosis: normalizeArray(fetchedPatient.diagnosis),
-        medicalResults: normalizeArray(fetchedPatient.medicalResults),
-      });
+      setPatient((prev) => ({
+        ...prev,
+        firstName: editedName.split("")[0],
+		    lastName: editedName.split("")[1],
+      }));
   
       handleCloseNameEditModal();
     } catch (error) {
@@ -98,7 +96,7 @@ const PatientDetail = () => {
         address: editedAddress,
       };
 
-      await UserService.updatePatient(id, updatedData);
+      await PatientService.updatePatient(id, updatedData);
       enqueueSnackbar('Patient address updated successfully', { variant: 'success' });
 
       setPatient(prev => ({
@@ -138,7 +136,7 @@ const PatientDetail = () => {
         diagnosis: editedDiagnoses,
       };
 
-      await UserService.updatePatient(id, updatedData);
+      await PatientService.updatePatient(id, updatedData);
       enqueueSnackbar('Patient diagnoses updated successfully', { variant: 'success' });
 
       setPatient((prev) => ({
@@ -179,7 +177,7 @@ const PatientDetail = () => {
         allergies: editedAllergies,
       };
 
-      await UserService.updatePatient(id, updatedData);
+      await PatientService.updatePatient(id, updatedData);
       enqueueSnackbar('Patient allergies updated successfully', { variant: 'success' });
 
       setPatient((prev) => ({
@@ -203,14 +201,16 @@ const PatientDetail = () => {
   };
 
   const handleAddMedicalResult = () => {
-    console.log(newMedicalResult)
-    console.log(newMedicalResult.text)
-    console.log(newMedicalResult.title)
+    if (newMedicalResult.title.trim() === '' || newMedicalResult.text.trim() === '') {
+      enqueueSnackbar('Both title and text are required', { variant: 'warning' });
+      return;
+    }
+  
     setEditedMedicalResults((currentMedicalResults) => [
       ...currentMedicalResults,
       newMedicalResult,
     ]);
-    setNewMedicalResult({ title: '', text: '' }); 
+    setNewMedicalResult({ title: '', text: '' });
   };
 
   const handleRemoveMedicalResult = (index) => {
@@ -226,7 +226,8 @@ const PatientDetail = () => {
         medicalResults: editedMedicalResults,
       };
   
-      await UserService.updatePatient(id, updatedData);
+      // currently has no impact, backend PUT doesn't work with the .medicalResults property
+      await PatientService.updatePatient(id, updatedData);
       enqueueSnackbar('Patient medical results updated successfully', { variant: 'success' });
   
       setPatient((prev) => ({
