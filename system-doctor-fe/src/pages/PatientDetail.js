@@ -12,6 +12,7 @@ import CancelIcon from '@mui/icons-material/Cancel';
 import CheckIcon from '@mui/icons-material/Check';
 import EditIcon from '@mui/icons-material/Edit';
 import { Dialog, DialogContent, DialogTitle, DialogActions } from '@mui/material';
+import PrivateKeyDialog from '../components/PrivateKeyDialog'
 import TextField from '@mui/material/TextField';
 import AppService from '../services/AppService';
 import { fetchData } from '../utils/decrypt';
@@ -24,6 +25,7 @@ const PatientDetail = () => {
   const { logout } = useAuth()
 
   // Dialog management
+  const [open, setOpen] = useState(false)
   const [isNameEditModalOpen, setIsNameEditModalOpen] = useState(false);
   const [editedName, setEditedName] = useState('');
   const [isAddressEditModalOpen, setIsAddressEditModalOpen] = useState(false);
@@ -311,7 +313,7 @@ const PatientDetail = () => {
       const pdfUrl = URL.createObjectURL(pdfBlob);
       const a = document.createElement('a');
       a.href = pdfUrl;
-      a.download = `${id}.pdf`;
+      a.download = `Patient_Medical_Card_${id}.pdf`;
       a.click();
     } catch (error) {
       enqueueSnackbar('Error generating PDF', { variant: 'error' });
@@ -321,6 +323,7 @@ const PatientDetail = () => {
   return (
     <div>
       <div>
+        <PrivateKeyDialog open={open} setOpen={setOpen}/>
         <Button
           onClick={Logout}
           variant='contained'
@@ -356,6 +359,15 @@ const PatientDetail = () => {
           style={{ margin: 5 }}
         >
           Dashboard
+        </Button>
+        <Button
+          onClick={() => setOpen(true)}
+          variant='contained'
+          color='info'
+          size='large'
+          style={{ margin: 5 }}
+        >
+          Update private key
         </Button>
       </div>
       <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', marginBottom: '20px' }}>
@@ -515,10 +527,10 @@ const PatientDetail = () => {
       <div>
         <h2>Medical Results <AddCircleIcon style={{cursor: 'pointer' }} onClick={handleOpenMedicalResultsEditModal}/></h2>
         {patient.medicalResults.length ? patient.medicalResults.map((result, index) => (
-          <div key={index} style={{ padding: '10px', border: '1px solid #ccc', // Add a border
+          <div key={index} style={{ padding: '10px', border: '1px solid #ccc', 
           borderRadius: '4px' }}>
             <h3>{result.title}</h3>
-            <p>Date: {result.date}</p>
+            <p>Date: {new Date(result.date).toLocaleString('en-US', { year: 'numeric', month: 'long', day: 'numeric', hour: '2-digit', minute: '2-digit' })}</p>
             <p>Text: {result.text}</p>
           </div>
         )) : <p>No medical results found</p>}
@@ -527,7 +539,7 @@ const PatientDetail = () => {
         <DialogTitle>Edit Medical Results</DialogTitle>
         <DialogContent>
           {editedMedicalResults.map((result, index) => (
-            <div key={index} style={{ display: 'flex', alignItems: 'center', marginBottom: 8, border: '1px solid #ccc', // Add a border
+            <div key={index} style={{ display: 'flex', alignItems: 'center', marginBottom: 8, border: '1px solid #ccc', 
             borderRadius: '4px' }}>
               <div style={{ flexGrow: 1 }}>
                 <p><strong>Title:</strong> {result.title}</p>
