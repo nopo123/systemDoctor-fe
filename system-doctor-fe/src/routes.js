@@ -1,22 +1,15 @@
 import { Suspense, lazy } from 'react';
 import { Navigate } from 'react-router-dom';
 
-const Loadable = (Component) => (props) =>
-	(
-		<Suspense>
-			<Component {...props} />
-		</Suspense>
-	);
+import AuthGuard from './components/AuthGuard';
+import GuestGuard from './components/GuestGuard';
+import Register from './pages/Register';
+import Login from './pages/Login';
+import Dashboard from './pages/Dashboard';
+import CreatePatient from './pages/CreatePatient';
+import ListPatient from './pages/ListPatient';  
+import PatientDetail from './pages/PatientDetail';
 
-const Register = Loadable(lazy(() => import('./pages/Register')));
-const Login = Loadable(lazy(() => import('./pages/Login')));
-const GuestGuard = Loadable(lazy(() => import('./components/GuestGuard')));
-const AuthGuard = Loadable(lazy(() => import('./components/AuthGuard')));
-const Dashboard = Loadable(lazy(() => import('./pages/Dashboard')));
-const Example = Loadable(lazy(() => import('./pages/Example')));
-const CreatePatient = Loadable(lazy(() => import('./pages/CreatePatient')));
-const ListPatient = Loadable(lazy(() => import('./pages/ListPatient')));
-const PatientDetail = Loadable(lazy(() => import('./pages/PatientDetail')));
 
 const routes = [
   {

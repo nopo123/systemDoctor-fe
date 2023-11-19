@@ -1,6 +1,5 @@
 import forge from 'node-forge';
 
-// Function to decrypt the symmetric key using the private key
 const decryptSymmetricKeyWithPrivateKey = (privateKey, encryptedSymmetricKey) => {
   const privateKeyObject = forge.pki.privateKeyFromPem(privateKey);
   const encryptedBytes = forge.util.decode64(encryptedSymmetricKey);
@@ -8,7 +7,6 @@ const decryptSymmetricKeyWithPrivateKey = (privateKey, encryptedSymmetricKey) =>
   return decrypted;
 };
 
-// Function to decrypt data with the decrypted symmetric key
 const decryptDataWithSymmetricKey = (encryptedData, decryptedSymmetricKey) => {
   const parts = encryptedData.split(':');
   const iv = forge.util.createBuffer(forge.util.hexToBytes(parts[0]));
@@ -27,11 +25,9 @@ const decryptDataWithSymmetricKey = (encryptedData, decryptedSymmetricKey) => {
   }
 };
 
-// Usage
 export const fetchData = (privateKey, _data) => {
-  // Assuming you received these values from the backend
-  const encryptedSymmetricKey = _data.key; // Encrypted symmetric key
-  const encryptedData = _data.data; // Encrypted data
+  const encryptedSymmetricKey = _data.key;
+  const encryptedData = _data.data;
   if (!privateKey.includes('PRIVATE KEY') || !privateKey.includes('BEGIN') || !privateKey.includes('END')) {
     return {
       error: 'Missing part in private BEGIN PRIVATE or END PRIVATE',
