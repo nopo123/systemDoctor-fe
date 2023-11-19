@@ -13,6 +13,8 @@ import CheckIcon from '@mui/icons-material/Check';
 import EditIcon from '@mui/icons-material/Edit';
 import { Dialog, DialogContent, DialogTitle, DialogActions } from '@mui/material';
 import TextField from '@mui/material/TextField';
+import AppService from '../services/AppService';
+import { fetchData } from '../utils/decrypt';
 
 const PatientDetail = () => {
   const { id } = useParams();
@@ -66,12 +68,13 @@ const PatientDetail = () => {
       };
       
       await PatientService.updatePatient(id, updatedData);
+
       enqueueSnackbar('Patient name updated successfully', { variant: 'success' });
   
       setPatient((prev) => ({
         ...prev,
-        firstName: editedName.split("")[0],
-		    lastName: editedName.split("")[1],
+        firstName: firstName,
+		    lastName: lastName,
       }));
   
       handleCloseNameEditModal();
@@ -137,6 +140,7 @@ const PatientDetail = () => {
       };
 
       await PatientService.updatePatient(id, updatedData);
+
       enqueueSnackbar('Patient diagnoses updated successfully', { variant: 'success' });
 
       setPatient((prev) => ({
@@ -205,6 +209,8 @@ const PatientDetail = () => {
       enqueueSnackbar('Both title and text are required', { variant: 'warning' });
       return;
     }
+
+    newMedicalResult.date = new Date().toISOString();
   
     setEditedMedicalResults((currentMedicalResults) => [
       ...currentMedicalResults,
@@ -222,12 +228,11 @@ const PatientDetail = () => {
   const updatePatientMedicalResults = async () => {
     try {
       const updatedData = {
-        ...patient,
+        birthId: patient.birthId,
         medicalResults: editedMedicalResults,
       };
   
-      // currently has no impact, backend PUT doesn't work with the .medicalResults property
-      await PatientService.updatePatient(id, updatedData);
+      await PatientService.createMedical(updatedData);
       enqueueSnackbar('Patient medical results updated successfully', { variant: 'success' });
   
       setPatient((prev) => ({
@@ -244,18 +249,31 @@ const PatientDetail = () => {
   useEffect(() => {
     const fetchPatient = async () => {
       try {
-        const fetchedPatient = await UserService.getPatientById(id);
-        
+        let fetchedPatient = await UserService.getPatientById(id);
+        let medicals = await PatientService.getMedicals(id);
+        const privateKey = AppService.getKey();
+        const parsedData = fetchData(privateKey, fetchedPatient);
+        if (!parsedData.message) {
+          enqueueSnackbar(parsedData.error, { variant: 'error' })
+          return
+        } 
+        const parsedMedicals = fetchData(privateKey, medicals);
+        if (!parsedMedicals.message) {
+          enqueueSnackbar(parsedMedicals.error, { variant: 'error' })
+          return
+        }
+        fetchedPatient = parsedData.message;
+        fetchedPatient.medicalResults = parsedMedicals.message;
         const normalizeArray = (arr) => arr.filter(item => item.trim() !== '');
         
         setPatient({
           ...fetchedPatient,
-          allergies: normalizeArray(fetchedPatient.allergies),
-          diagnosis: normalizeArray(fetchedPatient.diagnosis),
-          medicalResults: normalizeArray(fetchedPatient.medicalResults),
+          allergies: normalizeArray(JSON.parse(fetchedPatient.allergies)),
+          diagnosis: normalizeArray(JSON.parse(fetchedPatient.diagnosis)),
+          medicalResults: fetchedPatient.medicalResults || [],
         });
       } catch (error) {
-        console.error('Error fetching patient details:', error);
+        enqueueSnackbar('Error fetching patient details', { variant: 'error' });
       }
     };
   
@@ -266,9 +284,39 @@ const PatientDetail = () => {
     return <div>Loading...</div>;
   }
 
-  const exportPDF = () => {
-    // TODO: PDF
-  }
+  const exportPDF = async () => {
+    try {
+      const data = await PatientService.generatePdf(id);
+  
+      const privateKey = AppService.getKey();
+      const response = fetchData(privateKey, data);
+  
+      if (!response.message) {
+        enqueueSnackbar(response.error, { variant: 'error' });
+        return;
+      }
+  
+      const byteCharacters = response.message.data
+      .map((byte) => String.fromCharCode(byte))
+      .join('');
+      const byteNumbers = new Array(byteCharacters.length);
+
+      for (let i = 0; i < byteCharacters.length; i++) {
+        byteNumbers[i] = byteCharacters.charCodeAt(i);
+      }
+
+      const byteArray = new Uint8Array(byteNumbers);
+      const pdfBlob = new Blob([byteArray], { type: 'application/pdf' });
+
+      const pdfUrl = URL.createObjectURL(pdfBlob);
+      const a = document.createElement('a');
+      a.href = pdfUrl;
+      a.download = `${id}.pdf`;
+      a.click();
+    } catch (error) {
+      enqueueSnackbar('Error generating PDF', { variant: 'error' });
+    }
+  };
 
   return (
     <div>

@@ -280,7 +280,7 @@ const ListPatient = () => {
               <StyledTableCellHead align="right">Last Name</StyledTableCellHead>
               <StyledTableCellHead align="right">First Name</StyledTableCellHead>
               <StyledTableCellHead align="right">Address</StyledTableCellHead>
-              <StyledTableCellHead align="right">Request</StyledTableCellHead>
+              <StyledTableCellHead align="right">Threatment Request</StyledTableCellHead>
               <StyledTableCellHead align="right">Actions</StyledTableCellHead>
             </TableRow>
           </TableHead>
