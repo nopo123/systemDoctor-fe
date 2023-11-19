@@ -13,7 +13,7 @@ const Register = () => {
   const { enqueueSnackbar } = useSnackbar()
   const navigate = useNavigate()
   const passwordRegex =
-    /^(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{6,}$/
+  /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[^\da-zA-Z]).{6,}$/
 
   const validationSchema = Yup.object({
     firstName: Yup.string().required('Required'),
